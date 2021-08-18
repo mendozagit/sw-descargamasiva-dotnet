@@ -15,8 +15,8 @@ namespace sw.descargamasiva
 {
     class Program
     {
-        static byte[] pfx = File.ReadAllBytes(@"Resources\pfx.pfx");
-        static string password = "";
+        private static byte[] pfx;
+        static string password = "jjMM1994";
 
         static string urlAutentica = "https://cfdidescargamasivasolicitud.clouda.sat.gob.mx/Autenticacion/Autenticacion.svc";
         static string urlAutenticaAction = "http://DescargaMasivaTerceros.gob.mx/IAutenticacion/Autentica";
@@ -30,16 +30,36 @@ namespace sw.descargamasiva
         static string urlDescargarSolicitud = "https://cfdidescargamasiva.clouda.sat.gob.mx/DescargaMasivaService.svc";
         static string urlDescargarSolicitudAction = "http://DescargaMasivaTerceros.sat.gob.mx/IDescargaMasivaTercerosService/Descargar";
 
-        static string RfcEmisor = "";
+        static string RfcEmisor = "MEJJ940824C61";
         static string RfcReceptor = "";
-        static string FechaInicial = "2018-12-01";
-        static string FechaFinal = "2018-12-02";
+        static string FechaInicial = "2021-03-01";
+        static string FechaFinal = "2021-04-30";
+
+        private static string cerPath = @"C:\Users\PHILIPS-JESUSMENDOZA\Desktop\DGE131017IP1\cer.cer";
+        static string keyPath = @"C:\Users\PHILIPS-JESUSMENDOZA\Desktop\DGE131017IP1\key.key";
+        static string keyPass = "jjMM1994";
+        private static string binPath = @"C:\Program Files\OpenSSL-Win64\bin";
+        private static string tempDir = @"C:\Users\PHILIPS-JESUSMENDOZA\Desktop\DGE131017IP1\";
+
 
 
         static void Main(string[] args)
         {
+            var pfxSerice = new PfxService(tempDir, binPath);
+
+
+            var pfxFile = pfxSerice.CreatePfx(cerPath, keyPath, keyPass);
+
+
+
+
+
+            // pfx = File.ReadAllBytes(@"C:\Users\PHILIPS-JESUSMENDOZA\Desktop\DGE131017IP1\PFX.pfx");
+            pfx = pfxFile.Item2;
+
+            //pfx = pfxFile.Item2;
             //Obtener Certificados
-            X509Certificate2 certifcate = ObtenerX509Certificado(pfx); 
+            X509Certificate2 certifcate = ObtenerX509Certificado(pfx);
 
             //Obtener Token
             string token = ObtenerToken(certifcate);
@@ -49,7 +69,7 @@ namespace sw.descargamasiva
             //Generar Solicitud
             string idSolicitud = GenerarSolicitud(certifcate, autorization);
             Console.WriteLine("IdSolicitud: " + idSolicitud);
-
+            //string idSolicitud = "7b12ecad-b3de-4154-9990-210db3394de1";
             //Validar Solicitud
             string idPaquete = ValidarSolicitud(certifcate, autorization, idSolicitud);
             Console.WriteLine("IdPaquete: " + idPaquete);
@@ -77,11 +97,11 @@ namespace sw.descargamasiva
             byte[] file = Convert.FromBase64String(descargaResponse);
             Directory.CreateDirectory(path);
 
-            using (FileStream fs = File.Create(path + idPaquete + ".gzip", file.Length))
+            using (FileStream fs = File.Create(path + idPaquete + ".zip", file.Length))
             {
                 fs.Write(file, 0, file.Length);
             }
-            Console.WriteLine("FileCreated: " + path + idPaquete + ".gzip");
+            Console.WriteLine("FileCreated: " + path + idPaquete + ".zip");
         }
 
         private static string DescargarSolicitud(X509Certificate2 certifcate, string autorization, string idPaquete)
