@@ -79,9 +79,10 @@ namespace sw.descargamasiva
 
         #endregion
 
-        public override string GetResult(XmlDocument xmlDoc)
+        public override StepResponse GetResult(XmlDocument xmlDoc, string step)
         {
             string s = string.Empty;
+            var stepResponse = new StepResponse();
 
             int estado = Convert.ToInt16(xmlDoc.GetElementsByTagName("VerificaSolicitudDescargaResult")[0]
                 .Attributes["EstadoSolicitud"].Value);
@@ -89,8 +90,8 @@ namespace sw.descargamasiva
             {
                 s = xmlDoc.GetElementsByTagName("IdsPaquetes")[0].InnerXml;
             }
-
-            return s;
+         
+            return stepResponse;
         }
     }
 }

@@ -74,10 +74,12 @@ namespace sw.descargamasiva
             return soap_request;
         }
         #endregion
-        public override string GetResult(XmlDocument xmlDoc)
+        public override StepResponse GetResult(XmlDocument xmlDoc, string step)
         {
             string s = xmlDoc.GetElementsByTagName("Paquete")[0].InnerXml;
-            return s;
+            var stepResponse = new StepResponse();
+
+            return stepResponse;
         }
     }
 }

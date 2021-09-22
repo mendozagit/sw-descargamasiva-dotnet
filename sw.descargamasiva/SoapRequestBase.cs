@@ -26,7 +26,7 @@ namespace sw.descargamasiva
             webRequest = WebRequest(URL.ToString(), SOAPAction);
         }
 
-        public string Send(string autorization = null)
+        public StepResponse Send(string autorization = null, string resposeFileName = "", string stepName = "")
         {
             try
             {
@@ -51,10 +51,14 @@ namespace sw.descargamasiva
                 string result = sr.ReadToEnd();
                 sr.Close();
 
+                CacheManager.RawResponse = result;
+                File.AppendAllText(resposeFileName, result);
+
+
                 XmlDocument xmlDoc = new XmlDocument();
                 xmlDoc.LoadXml(result);
-                return GetResult(xmlDoc);
-               
+                return GetResult(xmlDoc, stepName);
+
             }
             catch (WebException e)
             {
@@ -66,8 +70,8 @@ namespace sw.descargamasiva
             }
         }
 
-        public abstract string GetResult(XmlDocument xmlDoc);
- 
+        public abstract StepResponse GetResult(XmlDocument xmlDoc, string stepName);
+
         private static HttpWebRequest WebRequest(string URL, string SOAPAction, int maxTimeMilliseconds = 120000)
         {
             HttpWebRequest webRequest = (HttpWebRequest)HttpWebRequest.Create(URL);
