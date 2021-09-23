@@ -4,6 +4,7 @@ using System.Xml;
 
 namespace sw.descargamasiva
 {
+
     internal class Solicitud : SoapRequestBase
     {
         public Solicitud(string url, string action)
@@ -97,4 +98,6 @@ namespace sw.descargamasiva
             return stepResponse;
         }
     }
+
 }
+

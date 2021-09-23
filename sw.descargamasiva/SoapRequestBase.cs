@@ -28,6 +28,7 @@ namespace sw.descargamasiva
 
         public StepResponse Send(string autorization = null, string resposeFileName = "", string stepName = "")
         {
+           
             try
             {
                 if (xml == null)
@@ -52,8 +53,7 @@ namespace sw.descargamasiva
                 sr.Close();
 
                 CacheManager.RawResponse = result;
-                File.AppendAllText(resposeFileName, result);
-
+                   File.WriteAllText(resposeFileName, result);
 
                 XmlDocument xmlDoc = new XmlDocument();
                 xmlDoc.LoadXml(result);
