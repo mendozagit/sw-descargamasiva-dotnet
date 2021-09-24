@@ -1,16 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
-using System.ServiceModel.Channels;
-using System.Text;
-using System.Threading.Tasks;
 using System.Web;
-using System.Xml;
 
 namespace sw.descargamasiva
 {
@@ -71,6 +63,7 @@ namespace sw.descargamasiva
 
 
             //Descargar Solicitud
+
             //Get packageList file inBase 64
             foreach (var packageId in stepResponseIdPaquete.PackageIdentifierList)
             {
