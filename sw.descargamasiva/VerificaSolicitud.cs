@@ -81,16 +81,27 @@ namespace sw.descargamasiva
 
         public override StepResponse GetResult(XmlDocument xmlDoc, string step)
         {
-            string s = string.Empty;
-            var stepResponse = new StepResponse();
 
-            int estado = Convert.ToInt16(xmlDoc.GetElementsByTagName("VerificaSolicitudDescargaResult")[0]
-                .Attributes["EstadoSolicitud"].Value);
-            if (estado != 1)
+            var stepResponse = new StepResponse()
             {
-                s = xmlDoc.GetElementsByTagName("IdsPaquetes")[0].InnerXml;
+                ResponseStatusCode = xmlDoc.GetElementsByTagName("VerificaSolicitudDescargaResult")[0].Attributes?["CodEstatus"]?.Value,
+                ResponseStatusMessage = xmlDoc.GetElementsByTagName("VerificaSolicitudDescargaResult")[0].Attributes?["Mensaje"]?.Value,
+                QtyCfdi = xmlDoc.GetElementsByTagName("VerificaSolicitudDescargaResult")[0].Attributes?["NumeroCFDIs"]?.Value,
+                CodeStatusRequest = xmlDoc.GetElementsByTagName("VerificaSolicitudDescargaResult")[0].Attributes?["CodigoEstadoSolicitud"]?.Value,
+                Situation = xmlDoc.GetElementsByTagName("VerificaSolicitudDescargaResult")[0].Attributes?["EstadoSolicitud"]?.Value
+            };
+
+
+            if (stepResponse.Situation == null || !stepResponse.Situation.Equals("3")) return stepResponse;
+
+            //Get all packages
+            var packageList = xmlDoc.GetElementsByTagName("IdsPaquetes");
+            for (var i = 0; i < packageList.Count; i++)
+            {
+                stepResponse.PackageIdentifierList.Add(packageList[i].InnerXml);
+                   
             }
-         
+
             return stepResponse;
         }
     }

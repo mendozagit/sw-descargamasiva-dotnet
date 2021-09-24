@@ -34,8 +34,8 @@ namespace sw.descargamasiva
         static string RfcEmisor = "";
         static string RfcReceptor = "MEJJ940824C61";
         static string RfcSolicitante = "MEJJ940824C61";
-        static string FechaInicial = "2020-01-01";
-        static string FechaFinal = "2020-01-27";
+        static string FechaInicial = "2019-01-01";
+        static string FechaFinal = "2021-09-23";
 
         static void Main(string[] args)
         {
@@ -54,29 +54,39 @@ namespace sw.descargamasiva
             Console.WriteLine("Token: " + stepResponseToken.Token);
 
             //Generar Solicitud
-            var stepResponseIdSolicitud = Step2GetRequest(certifcate, autorization);
-            Console.WriteLine("IdSolicitud: " + stepResponseIdSolicitud.RequestId);
+            //var stepResponseIdSolicitud = Step2GetRequest(certifcate, autorization);
+
+            //Console.WriteLine("IdSolicitud: " + stepResponseIdSolicitud.RequestId);
             //string idSolicitud = "7b12ecad-b3de-4154-9990-210db3394de1";
 
+            var stepResponseIdSolicitud = new StepResponse() { RequestId = "12f8896f-cb7c-4293-8959-06a7de29168c" };
+            Console.WriteLine("IdSolicitud: " + stepResponseIdSolicitud.RequestId);
             //Validar Solicitud
             //Get packageList
-            var stepResponseIdPaquete = Step3VerifyRequest(certifcate, autorization, stepResponseToken.RequestId);
-            Console.WriteLine("PackageIdentifierList: " + stepResponseIdPaquete.PackageIdentifierList.ToString());
+            var stepResponseIdPaquete = Step3VerifyRequest(certifcate, autorization, stepResponseIdSolicitud.RequestId);
+            Console.WriteLine("PackageIdentifierList: " + String.Join(Environment.NewLine, stepResponseIdPaquete.PackageIdentifierList));
+
+
+
 
 
             //Descargar Solicitud
             //Get packageList file inBase 64
             foreach (var packageId in stepResponseIdPaquete.PackageIdentifierList)
             {
-                var stepResponseDescargaResponse = Step4GetPackages(certifcate, autorization, packageId);
+                var stepResponse = Step4GetPackage(certifcate, autorization, packageId);
+                var base64File = stepResponse.Base64Package;
 
-                foreach (var package in stepResponseDescargaResponse.PackageList)
-                {
-                    File.WriteAllBytes(package.Key, Convert.FromBase64String(package.Value));
-                }
+                stepResponseIdPaquete.PackageList.Add(packageId, base64File);
 
             }
 
+            foreach (var package in stepResponseIdPaquete.PackageList)
+            {
+
+                File.WriteAllBytes($"{package.Key}.Zip", Convert.FromBase64String(package.Value));
+
+            }
 
             //GuardarSolicitud(idPaquete, descargaResponse);
 
@@ -103,18 +113,39 @@ namespace sw.descargamasiva
             Console.WriteLine("FileCreated: " + path + idPaquete + ".zip");
         }
 
-        private static StepResponse Step4GetPackages(X509Certificate2 certifcate, string autorization, string idPaquete)
+        private static StepResponse Step4GetPackage(X509Certificate2 certifcate, string autorization, string idPaquete)
         {
+            var method = MethodBase.GetCurrentMethod();
+            var methodName = method.Name;
+
+            var requestName = $"{methodName}Request.XML";
+            var responseName = $"{methodName}Response.XML";
+
             DescargarSolicitud descargarSolicitud = new DescargarSolicitud(urlDescargarSolicitud, urlDescargarSolicitudAction);
             string xmlDescarga = descargarSolicitud.Generate(certifcate, RfcSolicitante, idPaquete);
-            return descargarSolicitud.Send(autorization);
+
+            CacheManager.RawRequest = xmlDescarga;
+
+            File.WriteAllText(requestName, CacheManager.RawRequest);
+
+            return descargarSolicitud.Send(autorization, responseName, methodName);
         }
 
         private static StepResponse Step3VerifyRequest(X509Certificate2 certifcate, string autorization, string idSolicitud)
         {
+            var method = MethodBase.GetCurrentMethod();
+            var methodName = method.Name;
+
+            var requestName = $"{methodName}Request.XML";
+            var responseName = $"{methodName}Response.XML";
+
             VerificaSolicitud verifica = new VerificaSolicitud(urlVerificarSolicitud, urlVerificarSolicitudAction);
             string xmlVerifica = verifica.Generate(certifcate, RfcSolicitante, idSolicitud);
-            return verifica.Send(autorization);
+
+            CacheManager.RawRequest = xmlVerifica;
+
+            File.WriteAllText(requestName, CacheManager.RawRequest);
+            return verifica.Send(autorization, responseName, methodName);
         }
 
         private static StepResponse Step2GetRequest(X509Certificate2 certifcate, string autorization)
